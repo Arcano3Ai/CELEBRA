@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#7928CA" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#060913" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldSparkle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5C0"/>
+      <stop offset="45%" stop-color="#FCD34D"/>
+      <stop offset="70%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="cMetallic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748"/>
+      <stop offset="30%" stop-color="#1A202C"/>
+      <stop offset="70%" stop-color="#0D1117"/>
+      <stop offset="100%" stop-color="#2D3748"/>
+    </linearGradient>
+    <linearGradient id="cBorderGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="50%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#D946EF"/>
+    </linearGradient>
+    <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Aura / Glow -->
+  <circle cx="250" cy="250" r="210" fill="url(#bgGlow)"/>
+
+  <!-- Logo Emblem Group -->
+  <g transform="translate(0, 0)">
+    <!-- Outer Shadow of C -->
+    <path d="M340,150 C310,110 260,95 210,110 C145,130 110,195 115,265 C120,335 165,395 235,405 C295,415 350,375 365,320 C368,310 360,300 350,300 C340,300 334,306 331,315 C318,358 275,388 230,380 C175,372 138,322 135,265 C130,208 160,152 215,135 C255,122 295,135 322,168 C328,175 338,176 345,170 C351,164 350,153 340,150 Z" 
+          fill="black" opacity="0.4" transform="translate(4, 6)"/>
+
+    <!-- The Stylized Interlocking C Main Body -->
+    <path d="M340,150 C310,110 260,95 210,110 C145,130 110,195 115,265 C120,335 165,395 235,405 C295,415 350,375 365,320 C368,310 360,300 350,300 C340,300 334,306 331,315 C318,358 275,388 230,380 C175,372 138,322 135,265 C130,208 160,152 215,135 C255,122 295,135 322,168 C328,175 338,176 345,170 C351,164 350,153 340,150 Z" 
+          fill="url(#cMetallic)" stroke="url(#cBorderGlow)" stroke-width="4"/>
+
+    <!-- Inner Ribbon Arc -->
+    <path d="M315,175 C290,145 250,135 215,145 C165,160 135,210 140,265 C145,320 180,365 235,370 C280,375 320,345 335,305 C330,305 325,310 318,320 C300,345 268,358 235,352 C190,345 162,310 158,265 C154,220 178,178 220,165 C250,155 280,165 300,185 Z" 
+          fill="url(#goldSparkle)" opacity="0.85"/>
+
+    <!-- Center 4-Point Star (Main Sparkle) -->
+    <g transform="translate(250, 240)" filter="url(#glowEffect)">
+      <path d="M0,-45 Q3,-10 35,0 Q3,10 0,45 Q-3,10 -35,0 Q-3,-10 0,-45 Z" fill="url(#goldSparkle)"/>
+      <circle cx="0" cy="0" r="5" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Secondary Stars & Sparkles -->
+    <g transform="translate(325, 215)">
+      <path d="M0,-22 Q2,-5 18,0 Q2,5 0,22 Q-2,5 -18,0 Q-2,-5 0,-22 Z" fill="url(#goldSparkle)" opacity="0.9"/>
+    </g>
+    <g transform="translate(345, 255)">
+      <path d="M0,-14 Q1,-3 11,0 Q1,3 0,14 Q-1,3 -11,0 Q-1,-3 0,-14 Z" fill="#00F0FF" opacity="0.8"/>
+    </g>
+    <g transform="translate(175, 290)">
+      <path d="M0,-12 Q1,-2 10,0 Q1,2 0,12 Q-1,2 -10,0 Q-1,-2 0,-12 Z" fill="#D946EF" opacity="0.8"/>
+    </g>
+  </g>
+</svg>
