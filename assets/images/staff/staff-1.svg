@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="staff1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#0B1126" />
+    </linearGradient>
+    <linearGradient id="neonRing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#D946EF" />
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="#060913" stroke="url(#neonRing)" stroke-width="4"/>
+  <circle cx="100" cy="75" r="36" fill="#1E2952" stroke="#00F0FF" stroke-width="2"/>
+  <circle cx="100" cy="72" r="28" fill="#F8FAFC"/>
+  <!-- Auricular / Headset Staff -->
+  <path d="M 68 70 A 32 32 0 0 1 132 70" fill="none" stroke="#00F0FF" stroke-width="4" stroke-linecap="round"/>
+  <rect x="62" y="65" width="8" height="14" rx="4" fill="#00F0FF"/>
+  <rect x="130" y="65" width="8" height="14" rx="4" fill="#00F0FF"/>
+  <path d="M 134 75 Q 135 95 118 96" fill="none" stroke="#00F0FF" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="116" cy="96" r="4" fill="#D946EF"/>
+  <!-- Torso & Blazer -->
+  <path d="M 40 180 C 40 135, 70 125, 100 125 C 130 125, 160 135, 160 180 Z" fill="#0E1630"/>
+  <path d="M 85 125 L 100 155 L 115 125 Z" fill="#F8FAFC"/>
+  <path d="M 98 135 L 102 135 L 100 160 Z" fill="#00F0FF"/>
+  <!-- Badge STAFF -->
+  <rect x="75" y="165" width="50" height="16" rx="4" fill="#00F0FF" />
+  <text x="100" y="177" fill="#060913" font-size="9" font-family="sans-serif" font-weight="900" text-anchor="middle" letter-spacing="1">STAFF QR</text>
+</svg>

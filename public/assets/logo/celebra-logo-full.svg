@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 450" width="100%" height="100%">
+  <defs>
+    <radialGradient id="logoFullGlow" cx="50%" cy="35%" r="45%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.3"/>
+      <stop offset="40%" stop-color="#D946EF" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#060913" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="magentaLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="50%" stop-color="#D946EF"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="50%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="450" cy="140" r="180" fill="url(#logoFullGlow)"/>
+
+  <!-- ICON SECTION -->
+  <g transform="translate(325, 10) scale(0.5)">
+    <!-- C Outer shape -->
+    <path d="M340,150 C310,110 260,95 210,110 C145,130 110,195 115,265 C120,335 165,395 235,405 C295,415 350,375 365,320 C368,310 360,300 350,300 C340,300 334,306 331,315 C318,358 275,388 230,380 C175,372 138,322 135,265 C130,208 160,152 215,135 C255,122 295,135 322,168 C328,175 338,176 345,170 C351,164 350,153 340,150 Z" 
+          fill="#111827" stroke="url(#magentaLine)" stroke-width="6"/>
+    <!-- C Inner Arc -->
+    <path d="M315,175 C290,145 250,135 215,145 C165,160 135,210 140,265 C145,320 180,365 235,370 C280,375 320,345 335,305 C330,305 325,310 318,320 C300,345 268,358 235,352 C190,345 162,310 158,265 C154,220 178,178 220,165 C250,155 280,165 300,185 Z" 
+          fill="url(#sparkleGrad)" opacity="0.9"/>
+    <!-- Center Sparkle -->
+    <g transform="translate(250, 240)" filter="url(#starGlow)">
+      <path d="M0,-50 Q4,-12 40,0 Q4,12 0,50 Q-4,12 -40,0 Q-4,-12 0,-50 Z" fill="url(#sparkleGrad)"/>
+      <circle cx="0" cy="0" r="6" fill="#FFFFFF"/>
+    </g>
+    <!-- Secondary Sparkles -->
+    <g transform="translate(325, 215)" filter="url(#starGlow)">
+      <path d="M0,-24 Q2,-6 20,0 Q2,6 0,24 Q-2,6 -20,0 Q-2,-6 0,-24 Z" fill="#FCD34D"/>
+    </g>
+    <g transform="translate(350, 260)" filter="url(#starGlow)">
+      <path d="M0,-16 Q2,-4 13,0 Q2,4 0,16 Q-2,4 -13,0 Q-2,-4 0,-16 Z" fill="#00F0FF"/>
+    </g>
+  </g>
+
+  <!-- TEXT SECTION: CELEBRA -->
+  <text x="450" y="275" 
+        font-family="'Montserrat', 'Outfit', 'Inter', sans-serif" 
+        font-size="64" 
+        font-weight="900" 
+        letter-spacing="18" 
+        text-anchor="middle" 
+        fill="#FFFFFF">
+    CELEBRA
+  </text>
+
+  <!-- DIVIDER LINE LEFT -->
+  <line x1="160" y1="318" x2="270" y2="318" stroke="url(#magentaLine)" stroke-width="2.5" stroke-linecap="round" />
+  <!-- CIRCLE ACCENT LEFT -->
+  <circle cx="280" cy="318" r="3" fill="#D946EF"/>
+
+  <!-- SUBTITLE: INVITACIONES DIGITALES -->
+  <text x="450" y="325" 
+        font-family="'Montserrat', 'Outfit', 'Inter', sans-serif" 
+        font-size="22" 
+        font-weight="800" 
+        letter-spacing="10" 
+        text-anchor="middle" 
+        fill="#E879F9">
+    INVITACIONES DIGITALES
+  </text>
+
+  <!-- CIRCLE ACCENT RIGHT -->
+  <circle cx="620" cy="318" r="3" fill="#D946EF"/>
+  <!-- DIVIDER LINE RIGHT -->
+  <line x1="630" y1="318" x2="740" y2="318" stroke="url(#magentaLine)" stroke-width="2.5" stroke-linecap="round" />
+
+  <!-- FOOTER LINE: SERVICIOS INTEGRALES PARA EVENTOS -->
+  <text x="450" y="365" 
+        font-family="'Inter', sans-serif" 
+        font-size="14" 
+        font-weight="600" 
+        letter-spacing="8" 
+        text-anchor="middle" 
+        fill="#94A3B8">
+    SERVICIOS INTEGRALES PARA EVENTOS
+  </text>
+</svg>
