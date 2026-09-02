@@ -193,8 +193,38 @@ export const DigitalInvitation: React.FC = () => {
 
         {/* Scroll indicator */}
         <div className="mt-12 flex flex-col items-center gap-1 text-[11px] text-slate-400 animate-bounce">
-          <span>Desliza para ver itinerario y confirmar</span>
+          <span>Desliza para ver video teaser y confirmar</span>
           <span>↓</span>
+        </div>
+      </section>
+
+      {/* ============================================================
+          SECCIÓN: VIDEO TEASER CINEMATOGRÁFICO DE LA CELEBRACIÓN
+          ============================================================ */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div className="rounded-3xl overflow-hidden glass-panel border border-[#00F0FF]/30 shadow-[0_0_40px_rgba(0,240,255,0.15)]">
+          <div className="p-4 bg-[#0B1126]/90 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span>TEASER OFICIAL DEL EVENTO</span>
+            </div>
+            <span className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 px-2.5 py-0.5 rounded-full">
+              HD EXPERIENCE
+            </span>
+          </div>
+
+          <div className="relative aspect-video max-h-[440px] bg-black">
+            <video
+              src="./assets/video/ANIMALAEPICA_202609011716.mp4"
+              poster="./assets/images/juggler-gala-show.jpg"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 

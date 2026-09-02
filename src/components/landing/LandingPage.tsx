@@ -258,29 +258,43 @@ export const LandingPage: React.FC = () => {
               {/* Phone Screen Container */}
               <div className="relative w-full h-[620px] rounded-[40px] overflow-hidden bg-[#060913] border border-slate-800 flex flex-col text-left">
                 
-                {/* Simulated Screen Content: Elegant Wedding Invitation */}
-                <div className="relative h-64 bg-gradient-to-b from-[#18002E] to-[#060913] p-6 flex flex-col justify-end overflow-hidden">
+                {/* Simulated Screen Content: Elegant Wedding Invitation con Video Real en Vivo */}
+                <div className="relative h-72 p-6 flex flex-col justify-end overflow-hidden bg-black">
+                  <video
+                    src="./assets/video/ANIMALAEPICA_202609011716.mp4"
+                    poster="./assets/images/fire-performer-luxury.jpg"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060913] via-[#060913]/30 to-black/40 pointer-events-none" />
                   
                   {/* Decorative Sparkle overlay */}
-                  <div className="absolute top-2 right-4 flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2.5 py-1 rounded-full border border-amber-400/40">
-                    <Sparkles className="w-3 h-3 text-amber-300" />
-                    <span>INVITACIÓN OFICIAL</span>
+                  <div className="relative z-10 flex items-center justify-between mb-auto">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-[#00F0FF]/40">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                      <span>VIDEO SAVE THE DATE</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full border border-amber-400/40">
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                      <span>VIP</span>
+                    </div>
                   </div>
 
-                  {/* Confetti simulation dots */}
-                  <div className="absolute top-10 left-6 w-2 h-2 rounded-full bg-[#00F0FF] animate-ping" />
-                  <div className="absolute top-24 right-10 w-2.5 h-2.5 rounded-full bg-[#D946EF] animate-pulse" />
-                  <div className="absolute top-16 left-1/2 w-1.5 h-1.5 rounded-full bg-amber-400" />
-
-                  <p className="text-[11px] font-medium tracking-[0.25em] text-slate-300 uppercase">
-                    ¡Nos Casamos!
-                  </p>
-                  <h3 className="text-2xl font-serif font-bold text-white mt-1 leading-tight">
-                    Carlos &amp; Sofía
-                  </h3>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-amber-300">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>Sábado 21 Nov 2026</span>
+                  {/* Text Overlay sobre el Video */}
+                  <div className="relative z-10 space-y-0.5">
+                    <p className="text-[11px] font-medium tracking-[0.25em] text-[#00F0FF] uppercase">
+                      ¡Nos Casamos!
+                    </p>
+                    <h3 className="text-2xl font-serif font-bold text-white leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+                      Carlos &amp; Sofía
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-amber-300">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Sábado 21 Nov 2026</span>
+                    </div>
                   </div>
                 </div>
 
@@ -507,7 +521,35 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        {/* 3 Spectacular Show Cards */}
+        {/* Video Épico de Assets en Landing Page */}
+        <div className="relative rounded-3xl overflow-hidden glass-panel border border-[#00F0FF]/40 shadow-[0_0_50px_rgba(0,240,255,0.2)]">
+          <div className="p-4 sm:p-5 bg-[#060913]/90 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                VIDEO OFICIAL EN VIVO • DIVERTIFIESTA &amp; CELEBRA SHOWS
+              </span>
+            </div>
+            <span className="text-[11px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-2.5 py-1 rounded-full border border-[#00F0FF]/20">
+              HD 1080p • ANIMALA ÉPICA
+            </span>
+          </div>
+
+          <div className="relative aspect-video max-h-[520px] bg-black flex items-center justify-center">
+            <video
+              src="./assets/video/ANIMALAEPICA_202609011716.mp4"
+              poster="./assets/images/fire-performer-luxury.jpg"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* 2 Spectacular Show Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           
           {/* Card 1: Avienta Fuegos & Pirotecnia Fría */}
