@@ -28,76 +28,87 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [needsUserTouch, setNeedsUserTouch] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const interactionUnlockedRef = useRef<boolean>(false);
+  const isUnlockedRef = useRef<boolean>(false);
 
-  // Intentar reproducir de forma segura
-  const safePlay = useCallback(() => {
+  // Forzar reproducción automática con sonido
+  const forceAudioPlay = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     try {
       audio.volume = volume;
+      audio.muted = false;
     } catch {}
 
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-          setNeedsUserTouch(false);
-        })
-        .catch((err) => {
-          // Si el navegador móvil restringe el autoplay sin gesto previo
-          console.warn('Autoplay retenido por el navegador hasta primer toque:', err?.name);
-          setIsPlaying(false);
-          setNeedsUserTouch(true);
-        });
+    try {
+      await audio.play();
+      setIsPlaying(true);
+      setIsMuted(false);
+      setNeedsUserTouch(false);
+      isUnlockedRef.current = true;
+    } catch (err: any) {
+      console.warn('El navegador retuvo el sonido hasta la primera interacción del usuario:', err?.message);
+      // Fallback: iniciar en silencio para sincronizar el buffer y desmutear al primer toque/scroll
+      try {
+        audio.muted = true;
+        await audio.play();
+        setIsPlaying(true);
+        setIsMuted(true);
+      } catch {}
+      setNeedsUserTouch(true);
     }
   }, [volume]);
 
-  // Manejo de interacción inicial y autoplay
   useEffect(() => {
     if (autoPlay) {
-      safePlay();
+      forceAudioPlay();
     }
 
-    // Desbloqueo al primer toque/gesto en la pantalla (sin duplicar llamadas)
-    const unlockAndPlay = () => {
-      if (interactionUnlockedRef.current) return;
-      interactionUnlockedRef.current = true;
+    // Desmuteo automático ultra-sensible ante cualquier gesto en la página
+    const handleAnyUserInteraction = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
 
-      if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play()
-          .then(() => {
-            setIsPlaying(true);
-            setNeedsUserTouch(false);
-          })
-          .catch(() => {});
-      }
+      try {
+        audio.muted = false;
+        audio.volume = 0.85;
+      } catch {}
 
-      cleanupGlobalListeners();
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsMuted(false);
+          setNeedsUserTouch(false);
+          isUnlockedRef.current = true;
+        })
+        .catch(() => {});
+
+      removeInteractionListeners();
     };
 
-    const cleanupGlobalListeners = () => {
-      window.removeEventListener('pointerdown', unlockAndPlay);
-      window.removeEventListener('touchstart', unlockAndPlay);
-      window.removeEventListener('click', unlockAndPlay);
-      window.removeEventListener('scroll', unlockAndPlay);
-      window.removeEventListener('keydown', unlockAndPlay);
+    const removeInteractionListeners = () => {
+      window.removeEventListener('pointerdown', handleAnyUserInteraction);
+      window.removeEventListener('touchstart', handleAnyUserInteraction);
+      window.removeEventListener('click', handleAnyUserInteraction);
+      window.removeEventListener('scroll', handleAnyUserInteraction);
+      window.removeEventListener('wheel', handleAnyUserInteraction);
+      window.removeEventListener('keydown', handleAnyUserInteraction);
     };
 
-    window.addEventListener('pointerdown', unlockAndPlay, { once: true, passive: true });
-    window.addEventListener('touchstart', unlockAndPlay, { once: true, passive: true });
-    window.addEventListener('click', unlockAndPlay, { once: true });
-    window.addEventListener('scroll', unlockAndPlay, { once: true, passive: true });
-    window.addEventListener('keydown', unlockAndPlay, { once: true });
+    // Escuchar cualquier interacción en ventana (touch, click, scroll, wheel, teclas)
+    window.addEventListener('pointerdown', handleAnyUserInteraction, { once: true, passive: true });
+    window.addEventListener('touchstart', handleAnyUserInteraction, { once: true, passive: true });
+    window.addEventListener('click', handleAnyUserInteraction, { once: true });
+    window.addEventListener('scroll', handleAnyUserInteraction, { once: true, passive: true });
+    window.addEventListener('wheel', handleAnyUserInteraction, { once: true, passive: true });
+    window.addEventListener('keydown', handleAnyUserInteraction, { once: true });
 
     return () => {
-      cleanupGlobalListeners();
+      removeInteractionListeners();
     };
-  }, [autoPlay, safePlay]);
+  }, [autoPlay, forceAudioPlay]);
 
-  // Alternar Play/Pausa de forma atómica (sin dobles disparos en móviles)
+  // Alternar Play/Pause con clic del usuario
   const togglePlay = (e?: React.SyntheticEvent) => {
     if (e) {
       e.preventDefault();
@@ -106,13 +117,21 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     const audio = audioRef.current;
     if (!audio) return;
 
-    interactionUnlockedRef.current = true;
-
-    if (!audio.paused) {
+    if (!audio.paused && isPlaying) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      safePlay();
+      audio.muted = false;
+      try {
+        audio.volume = volume;
+      } catch {}
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsMuted(false);
+          setNeedsUserTouch(false);
+        })
+        .catch((err) => console.error('Error al reproducir:', err));
     }
   };
 
@@ -147,38 +166,43 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   return (
     <aside 
-      aria-label="Reproductor de audio ambiental oficial"
+      aria-label="Música oficial en automático"
       className={`fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-50 select-none max-w-[calc(100vw-1.5rem)] ${className}`}
     >
-      {/* Elemento de audio con src directo y fallback en sources */}
+      {/* Elemento de audio oficial configurado en automático */}
       <audio
         ref={audioRef}
         src={src}
+        autoPlay={autoPlay}
         loop
         preload="auto"
         playsInline
-        onPlay={() => setIsPlaying(true)}
+        onPlay={() => {
+          setIsPlaying(true);
+          if (audioRef.current && !audioRef.current.muted) {
+            setIsMuted(false);
+          }
+        }}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
       >
         <source src="./assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
         <source src="/assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
-        <source src="./assets/musica/Todo En Su Lugar.wav" type="audio/wav" />
       </audio>
 
-      {/* Sugerencia táctil cuando el navegador móvil requiere primer toque */}
+      {/* Notificación con botón de activación para dispositivos móviles */}
       {needsUserTouch && !isPlaying && (
         <button
           type="button"
           onClick={togglePlay}
-          className="mb-2 w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/30 to-[#F59E0B]/30 border border-[#00F0FF]/60 text-white text-xs font-bold shadow-[0_0_25px_rgba(0,240,255,0.4)] backdrop-blur-xl flex items-center justify-center sm:justify-start gap-2 cursor-pointer active:scale-95 transition-transform animate-pulse"
+          className="mb-2 w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/30 to-[#F59E0B]/30 border border-[#00F0FF]/60 text-white text-xs font-bold shadow-[0_0_25px_rgba(0,240,255,0.45)] backdrop-blur-xl flex items-center justify-center sm:justify-start gap-2 cursor-pointer active:scale-95 transition-transform animate-bounce"
         >
           <Sparkles className="w-4 h-4 text-[#00F0FF] shrink-0" />
-          <span className="text-[11px] sm:text-xs">🎵 Toca aquí para encender la música</span>
+          <span className="text-[11px] sm:text-xs">🎵 Toca aquí para escuchar la música de fiesta</span>
         </button>
       )}
 
-      {/* Dock de Control de Audio de Lujo */}
+      {/* Dock del reproductor oficial */}
       <div 
         className={`relative rounded-3xl transition-all duration-300 border bg-[#060913]/95 backdrop-blur-2xl shadow-[0_12px_35px_rgba(0,0,0,0.85)] ${
           isPlaying 
@@ -186,14 +210,14 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
             : 'border-slate-800 hover:border-slate-700'
         }`}
       >
-        {/* Glow dinámico animado al estar reproduciendo */}
+        {/* Resplandor neón pulsante cuando está sonando */}
         {isPlaying && (
           <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/25 to-[#F59E0B]/30 blur-sm pointer-events-none -z-10 animate-pulse" />
         )}
 
         <div className="p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3">
           
-          {/* Botón táctil unificado (48x48px) — sin rebotes ni dobles disparos en móviles */}
+          {/* Botón Play/Pause táctil de 48x48px */}
           <button
             type="button"
             onClick={togglePlay}
@@ -218,7 +242,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
               <div className="flex items-center justify-between gap-1.5">
                 <div className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#00F0FF]">
                   <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span>CELEBRA VIBE</span>
+                  <span>MÚSICA AUTOMÁTICA</span>
                 </div>
                 {/* Ecualizador animado */}
                 {isPlaying && (
@@ -235,7 +259,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 Todo En Su Lugar
               </span>
               <span className="text-[9px] sm:text-[10px] text-slate-400 truncate">
-                {isPlaying ? 'Divertifiesta Oficial' : 'Toca para escuchar'}
+                {isPlaying ? (isMuted ? 'Silenciado • Toca para sonido' : 'Divertifiesta Oficial') : 'Toca para escuchar'}
               </span>
 
               {/* Botón Silenciar y Slider de volumen */}
