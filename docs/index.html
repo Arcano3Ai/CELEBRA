@@ -13,14 +13,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
     <!-- Estilos de Producción para GitHub Pages -->
-    <script type="module" crossorigin src="./assets/app.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index.css">
+    <link rel="stylesheet" crossorigin href="./assets/index.css?v=20260901_final">
+    <link rel="stylesheet" crossorigin href="./dist/assets/index.css?v=20260901_final">
   </head>
   <body class="bg-[#060913] text-slate-100 font-sans antialiased selection:bg-[#00F0FF]/30 selection:text-white overflow-x-hidden min-h-screen">
     <div id="root"></div>
 
     <!-- Script de Producción para GitHub Pages -->
+    <script type="module" crossorigin src="./assets/app.js?v=20260901_final"></script>
 
     <!-- Script de Desarrollo Local para Vite -->
+    <script type="module">
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const s = document.createElement('script');
+        s.type = 'module';
+        s.src = '/src/main.tsx';
+        document.body.appendChild(s);
+      }
+    </script>
   </body>
 </html>

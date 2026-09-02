@@ -16,6 +16,23 @@ interface AudioPlayerProps {
   className?: string;
 }
 
+// Detección automática del mejor formato según los códecs soportados por el navegador
+const getBestAudioSource = (): string => {
+  if (typeof window === 'undefined') return './assets/musica/todo-en-su-lugar.mp3';
+  try {
+    const tester = document.createElement('audio');
+    const ogg = tester.canPlayType('audio/ogg; codecs="vorbis"');
+    if (ogg === 'probably' || ogg === 'maybe') {
+      return './assets/musica/todo-en-su-lugar.ogg';
+    }
+    const mp3 = tester.canPlayType('audio/mpeg');
+    if (mp3 === 'probably' || mp3 === 'maybe') {
+      return './assets/musica/todo-en-su-lugar.mp3';
+    }
+  } catch {}
+  return './assets/musica/todo-en-su-lugar.wav';
+};
+
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   autoPlay = true,
   className = ''
@@ -25,9 +42,16 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [volume, setVolume] = useState(0.85);
   const [isExpanded, setIsExpanded] = useState(true);
   const [needsUserTouch, setNeedsUserTouch] = useState(false);
+  const [activeSrc, setActiveSrc] = useState<string>('./assets/musica/todo-en-su-lugar.mp3');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Reproducir de forma segura seleccionando automáticamente el mejor códec (OGG / MP3 / WAV)
+  // Inicializar fuente compatible en el montaje
+  useEffect(() => {
+    const bestSrc = getBestAudioSource();
+    setActiveSrc(bestSrc);
+  }, []);
+
+  // Forzar reproducción automática con sonido
   const forceAudioPlay = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -38,16 +62,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     } catch {}
 
     try {
-      if (!audio.currentSrc) {
-        audio.load();
-      }
       await audio.play();
       setIsPlaying(true);
       setIsMuted(false);
       setNeedsUserTouch(false);
     } catch (err: any) {
-      console.warn('Autoplay con sonido esperando primera interacción del usuario:', err?.message);
-      // Iniciar muteado temporalmente si el navegador lo exige por política de autoplay
+      console.warn('Autoplay retenido por el navegador en espera de primer gesto:', err?.name);
+      // Fallback: iniciar en silencio para sincronizar el buffer y desmutear al primer toque/scroll
       try {
         audio.muted = true;
         await audio.play();
@@ -63,7 +84,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       forceAudioPlay();
     }
 
-    // Desmuteo y arranque automático en el PRIMER micro-gesto (scroll, touch, click, wheel, key)
+    // Desmuteo y arranque automático ante cualquier gesto en la página (scroll, click, touch, wheel)
     const handleAnyUserInteraction = () => {
       const audio = audioRef.current;
       if (!audio) return;
@@ -72,10 +93,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         audio.muted = false;
         audio.volume = 0.85;
       } catch {}
-
-      if (!audio.currentSrc) {
-        audio.load();
-      }
 
       audio.play()
         .then(() => {
@@ -126,16 +143,24 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       try {
         audio.volume = volume;
       } catch {}
-      if (!audio.currentSrc) {
-        audio.load();
-      }
       audio.play()
         .then(() => {
           setIsPlaying(true);
           setIsMuted(false);
           setNeedsUserTouch(false);
         })
-        .catch((err) => console.error('Error al reproducir audio:', err));
+        .catch((err) => {
+          console.warn('Fallback al formato alternativo:', err);
+          // Si por alguna razón falla el formato primario, cambiar a WAV universal
+          if (audio) {
+            audio.src = './assets/musica/todo-en-su-lugar.wav';
+            audio.play().then(() => {
+              setIsPlaying(true);
+              setIsMuted(false);
+              setNeedsUserTouch(false);
+            }).catch(() => {});
+          }
+        });
     }
   };
 
@@ -173,9 +198,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       aria-label="Música oficial en automático"
       className={`fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-50 select-none max-w-[calc(100vw-1.5rem)] ${className}`}
     >
-      {/* Elemento de audio multiformato para máxima compatibilidad web (OGG / MP3 / WAV) */}
+      {/* Elemento de audio con src resuelto explícitamente */}
       <audio
         ref={audioRef}
+        src={activeSrc}
         autoPlay={autoPlay}
         loop
         preload="auto"
@@ -188,15 +214,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         }}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-      >
-        <source src="./assets/musica/todo-en-su-lugar.ogg" type="audio/ogg" />
-        <source src="./assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
-        <source src="./assets/musica/todo-en-su-lugar.wav" type="audio/wav" />
-        <source src="/assets/musica/todo-en-su-lugar.ogg" type="audio/ogg" />
-        <source src="/assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
-      </audio>
+      />
 
-      {/* Notificación flotante si el navegador retiene sonido hasta el primer toque */}
+      {/* Sugerencia táctil cuando el navegador móvil requiere primer toque */}
       {needsUserTouch && !isPlaying && (
         <button
           type="button"
@@ -204,11 +224,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           className="mb-2 w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/30 to-[#F59E0B]/30 border border-[#00F0FF]/60 text-white text-xs font-bold shadow-[0_0_25px_rgba(0,240,255,0.45)] backdrop-blur-xl flex items-center justify-center sm:justify-start gap-2 cursor-pointer active:scale-95 transition-transform animate-bounce"
         >
           <Sparkles className="w-4 h-4 text-[#00F0FF] shrink-0" />
-          <span className="text-[11px] sm:text-xs">🎵 Toca aquí para escuchar la música de fiesta</span>
+          <span className="text-[11px] sm:text-xs">🎵 Toca aquí para encender la música de fiesta</span>
         </button>
       )}
 
-      {/* Dock del reproductor de audio oficial */}
+      {/* Dock del reproductor oficial */}
       <div 
         className={`relative rounded-3xl transition-all duration-300 border bg-[#060913]/95 backdrop-blur-2xl shadow-[0_12px_35px_rgba(0,0,0,0.85)] ${
           isPlaying 
@@ -216,14 +236,14 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
             : 'border-slate-800 hover:border-slate-700'
         }`}
       >
-        {/* Resplandor neón pulsante */}
+        {/* Glow animado al sonar */}
         {isPlaying && (
           <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/25 to-[#F59E0B]/30 blur-sm pointer-events-none -z-10 animate-pulse" />
         )}
 
         <div className="p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3">
           
-          {/* Botón Play/Pause táctil de 48x48px sin conflictos ni ghost clicks */}
+          {/* Botón táctil grande (48x48px) */}
           <button
             type="button"
             onClick={togglePlay}
