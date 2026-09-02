@@ -14,20 +14,20 @@
 
     <!-- Estilos de Producción para GitHub Pages (v4 anti-cache) -->
     <link rel="stylesheet" crossorigin href="./assets/index-v4.css">
-    <link rel="stylesheet" crossorigin href="./dist/assets/index-v4.css">
   </head>
   <body class="bg-[#060913] text-slate-100 font-sans antialiased selection:bg-[#00F0FF]/30 selection:text-white overflow-x-hidden min-h-screen">
     <div id="root"></div>
 
-    <!-- Script de Producción para GitHub Pages (v4 anti-cache) -->
-    <script type="module" crossorigin src="./assets/app-v4.js"></script>
+    <!-- Entry point estándar para Vite Dev y Build -->
+    <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Script de Desarrollo Local para Vite -->
+    <!-- Loader dinámico de producción para GitHub Pages -->
     <script type="module">
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      if (window.location.hostname.includes('github.io')) {
         const s = document.createElement('script');
         s.type = 'module';
-        s.src = '/src/main.tsx';
+        s.crossOrigin = 'anonymous';
+        s.src = './assets/app-v4.js';
         document.body.appendChild(s);
       }
     </script>
