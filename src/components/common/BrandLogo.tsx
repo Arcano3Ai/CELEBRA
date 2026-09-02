@@ -47,20 +47,20 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         {/* SVG Emblem matching official brand image */}
         <svg viewBox="0 0 100 100" className="relative w-full h-full drop-shadow-[0_2px_12px_rgba(0,240,255,0.4)]">
           <defs>
-            <linearGradient id="cMetallicMini" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#1E293B"/>
-              <stop offset="50%" stop-color="#0F172A"/>
-              <stop offset="100%" stop-color="#334155"/>
+            <linearGradient id={`grad-card-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1E293B"/>
+              <stop offset="50%" stopColor="#0F172A"/>
+              <stop offset="100%" stopColor="#334155"/>
             </linearGradient>
-            <linearGradient id="goldMini" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FFFBEB"/>
-              <stop offset="50%" stop-color="#FCD34D"/>
-              <stop offset="100%" stop-color="#F59E0B"/>
+            <linearGradient id={`grad-gold-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFFBEB"/>
+              <stop offset="50%" stopColor="#FCD34D"/>
+              <stop offset="100%" stopColor="#F59E0B"/>
             </linearGradient>
-            <linearGradient id="borderMini" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#00F0FF"/>
-              <stop offset="50%" stop-color="#D946EF"/>
-              <stop offset="100%" stop-color="#F59E0B"/>
+            <linearGradient id={`grad-neon-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#00F0FF"/>
+              <stop offset="50%" stopColor="#D946EF"/>
+              <stop offset="100%" stopColor="#F59E0B"/>
             </linearGradient>
           </defs>
 
