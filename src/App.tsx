@@ -19,8 +19,8 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans">
       <NavigationHeader />
 
-      {/* Control Bonito & Música Ambiental Global desde el inicio */}
-      <AudioPlayer src="/assets/musica/Todo En Su Lugar.wav" autoPlay={true} />
+      {/* Control Bonito & Música Ambiental Global optimizada para Móvil y Web */}
+      <AudioPlayer src="./assets/musica/todo-en-su-lugar.mp3" autoPlay={true} />
 
       <main className="flex-1">
         {activeView === 'LANDING' && <LandingPage />}

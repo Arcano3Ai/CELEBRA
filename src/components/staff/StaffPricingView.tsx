@@ -259,7 +259,7 @@ export const StaffPricingView: React.FC = () => {
                 Pista Musical Oficial de Gala
               </span>
               <span className="text-sm font-bold text-white">Todo En Su Lugar</span>
-              <span className="text-xs text-slate-400 block font-mono">assets/musica/Todo En Su Lugar.wav</span>
+              <span className="text-xs text-slate-400 block font-mono">assets/musica/todo-en-su-lugar.mp3 (Optimizado Móvil)</span>
             </div>
           </div>
           <audio 

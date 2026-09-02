@@ -154,9 +154,9 @@ export const STAFF_DIRECTORY: StaffMember[] = [
 ];
 
 export const STAFF_MEDIA_CONFIG = {
-  videoDemoUrl: '/assets/video/ANIMALAEPICA_202609011716.mp4',
-  audioTrackUrl: '/assets/musica/Todo En Su Lugar.wav',
-  fireShowImage: '/assets/images/fire-performer-luxury.jpg',
-  jugglerShowImage: '/assets/images/juggler-gala-show.jpg',
-  brandLogo: '/assets/logo/divertifiesta-codex.png'
+  videoDemoUrl: './assets/video/ANIMALAEPICA_202609011716.mp4',
+  audioTrackUrl: './assets/musica/todo-en-su-lugar.mp3',
+  fireShowImage: './assets/images/fire-performer-luxury.jpg',
+  jugglerShowImage: './assets/images/juggler-gala-show.jpg',
+  brandLogo: './assets/logo/divertifiesta-codex.png'
 };

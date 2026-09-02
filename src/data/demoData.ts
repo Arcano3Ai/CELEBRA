@@ -235,7 +235,7 @@ export const DEMO_EVENT: EventModel = {
   googleMapsUrl: 'https://maps.google.com',
   description: 'Hay momentos en la vida que son inolvidables, y compartirlos con las personas que más queremos los hace eternos. Te invitamos a celebrar el inicio de nuestra historia de amor con una noche llena de magia, música y alegría.',
   coverImage: '/assets/images/wedding-cover.jpg',
-  audioTrack: '/assets/musica/Todo En Su Lugar.wav',
+  audioTrack: './assets/musica/todo-en-su-lugar.mp3',
   templateId: 'celebra-gold',
   dressCode: {
     title: 'Rigurosa Etiqueta / Black Tie Elegante',

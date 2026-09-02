@@ -18,65 +18,87 @@ interface AudioPlayerProps {
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({
-  src = '/assets/musica/Todo En Su Lugar.wav',
+  src = './assets/musica/todo-en-su-lugar.mp3',
   autoPlay = true,
   className = ''
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.75);
+  const [volume, setVolume] = useState(0.8);
   const [isExpanded, setIsExpanded] = useState(true);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [needsUserTouch, setNeedsUserTouch] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Inicializar volumen y reproducción automática
+  // Intentar reproducción y registrar listener táctil para móviles (iOS / Android)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.volume = volume;
+    try {
+      audio.volume = volume;
+    } catch {
+      // Ignorar en navegadores móviles que no permiten modificar volume por software (e.g. iOS)
+    }
 
-    if (autoPlay) {
-      const playPromise = audio.play();
+    // Función segura para intentar reproducir
+    const attemptPlay = () => {
+      if (!audioRef.current) return;
+      const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsPlaying(true);
-            setAutoplayBlocked(false);
+            setNeedsUserTouch(false);
           })
           .catch(() => {
-            // El navegador bloqueó el autoplay sin gesto previo del usuario
+            // Políticas de autoplay en navegadores móviles (iOS Safari, Chrome Android)
             setIsPlaying(false);
-            setAutoplayBlocked(true);
+            setNeedsUserTouch(true);
           });
       }
+    };
+
+    if (autoPlay) {
+      attemptPlay();
     }
 
-    // Listener global: cualquier clic o toque en la pantalla inicia la música automáticamente
-    const handleFirstUserInteraction = () => {
+    // Eventos táctiles universales para móviles y escritorio:
+    // Con el primer toque o scroll del usuario, se desbloquea y arranca el audio
+    const handleFirstTouch = () => {
       if (audioRef.current && audioRef.current.paused) {
         audioRef.current.play()
           .then(() => {
             setIsPlaying(true);
-            setAutoplayBlocked(false);
+            setNeedsUserTouch(false);
           })
           .catch(() => {});
       }
-      window.removeEventListener('pointerdown', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
+      cleanupListeners();
     };
 
-    window.addEventListener('pointerdown', handleFirstUserInteraction, { once: true });
-    window.addEventListener('keydown', handleFirstUserInteraction, { once: true });
+    const cleanupListeners = () => {
+      window.removeEventListener('touchstart', handleFirstTouch);
+      window.removeEventListener('touchend', handleFirstTouch);
+      window.removeEventListener('pointerdown', handleFirstTouch);
+      window.removeEventListener('click', handleFirstTouch);
+      window.removeEventListener('keydown', handleFirstTouch);
+    };
+
+    window.addEventListener('touchstart', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('touchend', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('pointerdown', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('click', handleFirstTouch, { once: true });
+    window.addEventListener('keydown', handleFirstTouch, { once: true });
 
     return () => {
-      window.removeEventListener('pointerdown', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
+      cleanupListeners();
     };
   }, [autoPlay, src]);
 
-  const togglePlay = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const togglePlay = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (!audioRef.current) return;
 
     if (isPlaying) {
@@ -86,15 +108,15 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       audioRef.current.play()
         .then(() => {
           setIsPlaying(true);
-          setAutoplayBlocked(false);
+          setNeedsUserTouch(false);
         })
         .catch((err) => {
-          console.warn('No se pudo reproducir el audio:', err);
+          console.warn('Error al activar audio:', err);
         });
     }
   };
 
-  const toggleMute = (e: React.MouseEvent) => {
+  const toggleMute = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     if (!audioRef.current) return;
     const nextMute = !isMuted;
@@ -107,7 +129,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     const newVol = parseFloat(e.target.value);
     setVolume(newVol);
     if (audioRef.current) {
-      audioRef.current.volume = newVol;
+      try {
+        audioRef.current.volume = newVol;
+      } catch {}
       if (newVol === 0) {
         audioRef.current.muted = true;
         setIsMuted(true);
@@ -119,72 +143,84 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   };
 
   return (
-    <div className={`fixed bottom-5 right-5 z-50 select-none ${className}`}>
+    <aside 
+      aria-label="Reproductor de audio ambiental"
+      className={`fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-50 select-none max-w-[calc(100vw-1.5rem)] ${className}`}
+    >
+      {/* Elemento de audio con fallback en MP3 ligero y WAV */}
       <audio
         ref={audioRef}
-        src={src}
         loop
         preload="auto"
+        playsInline
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-      />
+      >
+        <source src="./assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
+        <source src="/assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
+        <source src="./assets/musica/Todo En Su Lugar.wav" type="audio/wav" />
+      </audio>
 
-      {/* Notificación sutil si el navegador bloqueó el autoplay */}
-      {autoplayBlocked && !isPlaying && (
-        <div 
+      {/* Notificación flotante táctil optimizada para móviles */}
+      {needsUserTouch && !isPlaying && (
+        <button
+          type="button"
           onClick={togglePlay}
-          className="mb-2.5 px-3.5 py-2 rounded-2xl bg-[#0B1126]/95 border border-[#00F0FF]/50 text-white text-xs font-semibold shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl flex items-center gap-2 cursor-pointer hover:border-[#D946EF] transition-all animate-bounce"
+          onTouchStart={togglePlay}
+          className="mb-2 w-full sm:w-auto px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#00F0FF]/25 via-[#D946EF]/30 to-[#F59E0B]/25 border border-[#00F0FF]/60 text-white text-xs font-bold shadow-[0_0_25px_rgba(0,240,255,0.4)] backdrop-blur-xl flex items-center justify-center sm:justify-start gap-2 cursor-pointer active:scale-95 transition-transform animate-pulse"
         >
-          <Sparkles className="w-4 h-4 text-[#00F0FF] animate-pulse" />
-          <span>🎵 Haz clic aquí para activar la música de fiesta</span>
-        </div>
+          <Sparkles className="w-4 h-4 text-[#00F0FF] shrink-0" />
+          <span className="text-[11px] sm:text-xs">🎵 Toca aquí para escuchar la música</span>
+        </button>
       )}
 
-      {/* Control Bonito — Glassmorphism Luxury Music Dock */}
+      {/* Dock del reproductor optimizado para móvil y desktop */}
       <div 
-        className={`relative rounded-3xl transition-all duration-300 border bg-[#060913]/90 backdrop-blur-2xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] ${
+        className={`relative rounded-3xl transition-all duration-300 border bg-[#060913]/95 backdrop-blur-2xl shadow-[0_12px_35px_rgba(0,0,0,0.8)] ${
           isPlaying 
-            ? 'border-[#00F0FF]/50 shadow-[0_0_35px_rgba(0,240,255,0.25)]' 
-            : 'border-[#1E2952] hover:border-slate-600'
+            ? 'border-[#00F0FF]/60 shadow-[0_0_30px_rgba(0,240,255,0.3)]' 
+            : 'border-slate-800 hover:border-slate-700'
         }`}
       >
-        {/* Glow ambient pulse */}
+        {/* Halo resplandeciente neón al sonar */}
         {isPlaying && (
-          <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/20 to-[#F59E0B]/30 blur-sm pointer-events-none -z-10 animate-pulse" />
+          <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/25 to-[#F59E0B]/30 blur-sm pointer-events-none -z-10 animate-pulse" />
         )}
 
-        <div className="p-2.5 flex items-center gap-3">
+        <div className="p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3">
           
-          {/* Botón Principal Play / Pause con Disco Giratorio */}
+          {/* Botón táctil grande (48x48px) para pulgar móvil */}
           <button
+            type="button"
             onClick={togglePlay}
-            aria-label={isPlaying ? 'Pausar música' : 'Reproducir música'}
-            className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group cursor-pointer ${
+            onTouchStart={togglePlay}
+            aria-label={isPlaying ? 'Pausar música ambiental' : 'Reproducir música ambiental'}
+            className={`relative w-12 h-12 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 cursor-pointer active:scale-95 ${
               isPlaying
-                ? 'bg-gradient-to-tr from-[#00F0FF] to-[#D946EF] text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.6)] scale-105'
+                ? 'bg-gradient-to-tr from-[#00F0FF] to-[#D946EF] text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.6)]'
                 : 'bg-slate-900 text-white hover:bg-slate-800 border border-slate-700'
             }`}
             title={isPlaying ? 'Pausar música' : 'Reproducir música'}
           >
             {isPlaying ? (
-              <div className="relative flex items-center justify-center">
-                <Disc3 className="w-6 h-6 text-slate-950 animate-spin [animation-duration:3s]" />
-              </div>
+              <Disc3 className="w-6 h-6 text-slate-950 animate-spin [animation-duration:3s]" />
             ) : (
-              <Play className="w-5 h-5 ml-0.5 text-[#00F0FF] fill-[#00F0FF] group-hover:scale-110 transition-transform" />
+              <Play className="w-5 h-5 ml-0.5 text-[#00F0FF] fill-[#00F0FF]" />
             )}
           </button>
 
-          {/* Información y Ecualizador */}
+          {/* Información y Ecualizador Dinámico */}
           {isExpanded && (
-            <div className="flex flex-col pr-1 min-w-[140px] max-w-[200px]">
-              <div className="flex items-center justify-between gap-2">
-                <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#00F0FF]">
-                  <Music className="w-3 h-3" />
+            <div className="flex flex-col pr-1 min-w-[125px] sm:min-w-[150px] max-w-[170px] sm:max-w-[210px]">
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#00F0FF]">
+                  <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   <span>CELEBRA VIBE</span>
                 </div>
                 {/* Ecualizador animado */}
                 {isPlaying && (
-                  <div className="flex items-end gap-0.5 h-3 px-1">
+                  <div className="flex items-end gap-0.5 h-2.5 px-0.5" aria-hidden="true">
                     <span className="w-0.5 bg-[#00F0FF] rounded-full animate-[bounce_0.8s_infinite_100ms] h-full" />
                     <span className="w-0.5 bg-[#D946EF] rounded-full animate-[bounce_0.8s_infinite_300ms] h-2/3" />
                     <span className="w-0.5 bg-[#F59E0B] rounded-full animate-[bounce_0.8s_infinite_200ms] h-4/5" />
@@ -193,26 +229,30 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 )}
               </div>
 
-              <span className="text-xs font-bold text-white truncate">
+              <span className="text-[11px] sm:text-xs font-bold text-white truncate">
                 Todo En Su Lugar
               </span>
-              <span className="text-[10px] text-slate-400 truncate">
-                {isPlaying ? 'Divertifiesta Oficial' : 'Pausado • Toca Play'}
+              <span className="text-[9px] sm:text-[10px] text-slate-400 truncate">
+                {isPlaying ? 'Divertifiesta Oficial' : 'Toca para escuchar'}
               </span>
 
-              {/* Slider de volumen interactivo */}
-              <div className="flex items-center gap-2 mt-1.5">
+              {/* Controles de sonido */}
+              <div className="flex items-center gap-2 mt-1">
                 <button
+                  type="button"
                   onClick={toggleMute}
-                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  onTouchStart={toggleMute}
+                  className="p-1 -ml-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
                   title={isMuted ? 'Activar sonido' : 'Silenciar'}
+                  aria-label={isMuted ? 'Activar sonido' : 'Silenciar'}
                 >
-                  {isMuted || volume === 0 ? (
+                  {isMuted ? (
                     <VolumeX className="w-3.5 h-3.5 text-rose-400" />
                   ) : (
                     <Volume2 className="w-3.5 h-3.5 text-[#00F0FF]" />
                   )}
                 </button>
+                {/* Slider oculto en pantallas diminutas para no saturar la vista móvil */}
                 <input
                   type="range"
                   min="0"
@@ -220,8 +260,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                   step="0.05"
                   value={isMuted ? 0 : volume}
                   onChange={handleVolumeChange}
-                  aria-label="Control de volumen"
-                  className="w-20 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#00F0FF]"
+                  aria-label="Volumen de música"
+                  className="hidden sm:block w-16 sm:w-20 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#00F0FF]"
                 />
               </div>
             </div>
@@ -229,9 +269,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
           {/* Botón Minimizar / Expandir */}
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-6 h-6 rounded-full bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 sm:w-6 sm:h-6 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
             title={isExpanded ? 'Minimizar reproductor' : 'Expandir controles'}
+            aria-label={isExpanded ? 'Minimizar reproductor' : 'Expandir controles'}
           >
             {isExpanded ? (
               <ChevronDown className="w-3.5 h-3.5" />
@@ -242,6 +284,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
