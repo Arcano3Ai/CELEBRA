@@ -12,13 +12,11 @@ import {
 } from 'lucide-react';
 
 interface AudioPlayerProps {
-  src?: string;
   autoPlay?: boolean;
   className?: string;
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({
-  src = './assets/musica/todo-en-su-lugar.mp3',
   autoPlay = true,
   className = ''
 }) => {
@@ -28,9 +26,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [needsUserTouch, setNeedsUserTouch] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isUnlockedRef = useRef<boolean>(false);
 
-  // Forzar reproducción automática con sonido
+  // Reproducir de forma segura seleccionando automáticamente el mejor códec (OGG / MP3 / WAV)
   const forceAudioPlay = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -41,14 +38,16 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     } catch {}
 
     try {
+      if (!audio.currentSrc) {
+        audio.load();
+      }
       await audio.play();
       setIsPlaying(true);
       setIsMuted(false);
       setNeedsUserTouch(false);
-      isUnlockedRef.current = true;
     } catch (err: any) {
-      console.warn('El navegador retuvo el sonido hasta la primera interacción del usuario:', err?.message);
-      // Fallback: iniciar en silencio para sincronizar el buffer y desmutear al primer toque/scroll
+      console.warn('Autoplay con sonido esperando primera interacción del usuario:', err?.message);
+      // Iniciar muteado temporalmente si el navegador lo exige por política de autoplay
       try {
         audio.muted = true;
         await audio.play();
@@ -64,7 +63,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       forceAudioPlay();
     }
 
-    // Desmuteo automático ultra-sensible ante cualquier gesto en la página
+    // Desmuteo y arranque automático en el PRIMER micro-gesto (scroll, touch, click, wheel, key)
     const handleAnyUserInteraction = () => {
       const audio = audioRef.current;
       if (!audio) return;
@@ -74,12 +73,15 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         audio.volume = 0.85;
       } catch {}
 
+      if (!audio.currentSrc) {
+        audio.load();
+      }
+
       audio.play()
         .then(() => {
           setIsPlaying(true);
           setIsMuted(false);
           setNeedsUserTouch(false);
-          isUnlockedRef.current = true;
         })
         .catch(() => {});
 
@@ -95,7 +97,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       window.removeEventListener('keydown', handleAnyUserInteraction);
     };
 
-    // Escuchar cualquier interacción en ventana (touch, click, scroll, wheel, teclas)
     window.addEventListener('pointerdown', handleAnyUserInteraction, { once: true, passive: true });
     window.addEventListener('touchstart', handleAnyUserInteraction, { once: true, passive: true });
     window.addEventListener('click', handleAnyUserInteraction, { once: true });
@@ -108,7 +109,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     };
   }, [autoPlay, forceAudioPlay]);
 
-  // Alternar Play/Pause con clic del usuario
+  // Alternar Play/Pausa de forma atómica
   const togglePlay = (e?: React.SyntheticEvent) => {
     if (e) {
       e.preventDefault();
@@ -125,13 +126,16 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       try {
         audio.volume = volume;
       } catch {}
+      if (!audio.currentSrc) {
+        audio.load();
+      }
       audio.play()
         .then(() => {
           setIsPlaying(true);
           setIsMuted(false);
           setNeedsUserTouch(false);
         })
-        .catch((err) => console.error('Error al reproducir:', err));
+        .catch((err) => console.error('Error al reproducir audio:', err));
     }
   };
 
@@ -169,10 +173,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       aria-label="Música oficial en automático"
       className={`fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-50 select-none max-w-[calc(100vw-1.5rem)] ${className}`}
     >
-      {/* Elemento de audio oficial configurado en automático */}
+      {/* Elemento de audio multiformato para máxima compatibilidad web (OGG / MP3 / WAV) */}
       <audio
         ref={audioRef}
-        src={src}
         autoPlay={autoPlay}
         loop
         preload="auto"
@@ -186,11 +189,14 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
       >
+        <source src="./assets/musica/todo-en-su-lugar.ogg" type="audio/ogg" />
         <source src="./assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
+        <source src="./assets/musica/todo-en-su-lugar.wav" type="audio/wav" />
+        <source src="/assets/musica/todo-en-su-lugar.ogg" type="audio/ogg" />
         <source src="/assets/musica/todo-en-su-lugar.mp3" type="audio/mpeg" />
       </audio>
 
-      {/* Notificación con botón de activación para dispositivos móviles */}
+      {/* Notificación flotante si el navegador retiene sonido hasta el primer toque */}
       {needsUserTouch && !isPlaying && (
         <button
           type="button"
@@ -202,7 +208,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         </button>
       )}
 
-      {/* Dock del reproductor oficial */}
+      {/* Dock del reproductor de audio oficial */}
       <div 
         className={`relative rounded-3xl transition-all duration-300 border bg-[#060913]/95 backdrop-blur-2xl shadow-[0_12px_35px_rgba(0,0,0,0.85)] ${
           isPlaying 
@@ -210,14 +216,14 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
             : 'border-slate-800 hover:border-slate-700'
         }`}
       >
-        {/* Resplandor neón pulsante cuando está sonando */}
+        {/* Resplandor neón pulsante */}
         {isPlaying && (
           <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-[#00F0FF]/30 via-[#D946EF]/25 to-[#F59E0B]/30 blur-sm pointer-events-none -z-10 animate-pulse" />
         )}
 
         <div className="p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3">
           
-          {/* Botón Play/Pause táctil de 48x48px */}
+          {/* Botón Play/Pause táctil de 48x48px sin conflictos ni ghost clicks */}
           <button
             type="button"
             onClick={togglePlay}
