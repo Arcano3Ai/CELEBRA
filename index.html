@@ -2,7 +2,7 @@
 <html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/logo/celebra-icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./assets/logo/celebra-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CELEBRA — Ecosistema Digital de Eventos | Invitaciones, RSVP y Check-in QR</title>
     <meta name="description" content="Plataforma SaaS premium para crear invitaciones digitales, confirmar invitados, generar códigos QR y controlar el acceso a tu evento en tiempo real. Tu evento comienza aquí." />
@@ -11,9 +11,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- Estilos de Producción para GitHub Pages -->
+    <link rel="stylesheet" crossorigin href="./assets/index.css">
+    <link rel="stylesheet" crossorigin href="./dist/assets/index.css">
   </head>
   <body class="bg-[#060913] text-slate-100 font-sans antialiased selection:bg-[#00F0FF]/30 selection:text-white overflow-x-hidden min-h-screen">
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Script de Producción para GitHub Pages -->
+    <script type="module" crossorigin src="./assets/app.js"></script>
+
+    <!-- Script de Desarrollo Local para Vite -->
+    <script type="module">
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const s = document.createElement('script');
+        s.type = 'module';
+        s.src = '/src/main.tsx';
+        document.body.appendChild(s);
+      }
+    </script>
   </body>
 </html>
